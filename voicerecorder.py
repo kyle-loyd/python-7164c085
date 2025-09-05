@@ -16,6 +16,5 @@ class VoiceRecorder:
         self.audio = sd.rec(frames=int(self.duration * self.sample_rate), samplerate=self.sample_rate, channels=1, dtype='float32')
         sd.wait()
 
-
     def save(self):
         sf.write(self.filename, self.audio, self.sample_rate)

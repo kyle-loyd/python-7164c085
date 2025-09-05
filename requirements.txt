@@ -1,7 +1,12 @@
 cffi==1.17.1
 dotenv==0.9.9
+iniconfig==2.1.0
 numpy==2.3.2
+packaging==25.0
+pluggy==1.6.0
 pycparser==2.22
+Pygments==2.19.2
+pytest==8.4.2
 python-dotenv==1.1.1
 sounddevice==0.5.2
 soundfile==0.13.1
