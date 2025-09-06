@@ -1,9 +1,9 @@
 import numpy as np
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from voicerecorder import VoiceRecorder
 
 def test_record_creates_audio_array():
-    vr = VoiceRecorder(duration=1, sample_rate=16000)
+    vr = VoiceRecorder()
 
     fake_audio = np.zeros((16000, 1), dtype='float32')
 
@@ -18,13 +18,13 @@ def test_record_creates_audio_array():
         assert vr.audio.shape == (16000, 1)
 
 def test_save_writes_file(tmp_path):
-    vr = VoiceRecorder(filename=str(tmp_path / "test.wav"))
+    vr = VoiceRecorder()
     vr.audio = np.zeros((16000, 1), dtype='float32')
 
     with patch("soundfile.write") as mock_write:
         vr.save()
         mock_write.assert_called_once()
         args, kwargs = mock_write.call_args
-        assert args[0] == vr.filename
+        assert args[0] == vr.full_path
         assert isinstance(args[1], np.ndarray)
         assert args[2] == vr.sample_rate

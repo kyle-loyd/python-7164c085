@@ -1,20 +1,22 @@
-import sounddevice as sd
-import soundfile as sf
-
-DEFAULT_FILENAME = "recording.wav"
-DEFAULT_DURATION = 5 #seconds
-DEFAULT_SAMPLE_RATE = 16000 #Hz
+from datetime import datetime
+import sounddevice as device
+import soundfile as file
+import os
 
 class VoiceRecorder:
 
-    def __init__(self, filename="recording.wav", duration=5, sample_rate=16000):
-        self.filename = filename
-        self.duration = duration
-        self.sample_rate = sample_rate
+    def __init__(self):
+        destination_dir = os.environ.get("RECORDINGS_DIR", "./recordings")
+        formatted_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"recording-{formatted_timestamp}.wav"
+
+        self.full_path = f"{destination_dir}/{filename}"
+        self.duration = os.environ.get("RECORDING_DURATION", 5)
+        self.sample_rate = os.environ.get("SAMPLE_RATE", 16000)
 
     def record(self):
-        self.audio = sd.rec(frames=int(self.duration * self.sample_rate), samplerate=self.sample_rate, channels=1, dtype='float32')
-        sd.wait()
+        self.audio = device.rec(frames=int(self.duration * self.sample_rate), samplerate=self.sample_rate, channels=1, dtype='float32')
+        device.wait()
 
     def save(self):
-        sf.write(self.filename, self.audio, self.sample_rate)
+        file.write(self.full_path, self.audio, self.sample_rate)
