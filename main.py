@@ -33,6 +33,14 @@ def capture_command():
         print(f"Saving failed: {save_exception}")
         return
     print("Voice command successfully saved.")
+
+    try:
+        fm.manage_recordings()
+    except Exception as manage_exception:
+        print(f"File management failed: {manage_exception}")
+        return
+    print("Recording cleanup complete.")
+
     return vr.full_path
 
 def transcribe_command(filepath):
