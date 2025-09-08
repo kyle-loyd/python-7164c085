@@ -1,9 +1,16 @@
+from datetime import datetime
 import os
 
+DEFAULT_RETENTION_COUNT = 5
+DEFAULT_RECORDINGS_DIR = "./recordings"
+
 class FileManager:
-    def __init__(self):
-        self.retention_count = os.environ.get("COMMAND_RETENTION_COUNT", 5)
-        self.recordings_dir = os.environ.get("RECORDINGS_DIR", "./recordings")
+    def __init__(self, env_configs={}):
+        self.retention_count = int(env_configs.get("COMMAND_RETENTION_COUNT", DEFAULT_RETENTION_COUNT))
+        self.recordings_dir = env_configs.get("RECORDINGS_DIR", DEFAULT_RECORDINGS_DIR)
+        formatted_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"recording-{formatted_timestamp}.wav"
+        self.full_path = f"{self.recordings_dir}/{filename}"
 
     def manage_recordings_dir(self):
         if not os.path.isdir(self.recordings_dir):

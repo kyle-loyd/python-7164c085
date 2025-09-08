@@ -17,14 +17,15 @@ def test_record_creates_audio_array():
         assert isinstance(vr.audio, np.ndarray)
         assert vr.audio.shape == (16000, 1)
 
-def test_save_writes_file(tmp_path):
+def test_save_writes_file():
     vr = VoiceRecorder()
     vr.audio = np.zeros((16000, 1), dtype='float32')
+    full_path = "test_output.wav"
 
     with patch("soundfile.write") as mock_write:
-        vr.save()
+        vr.save(full_path)
         mock_write.assert_called_once()
-        args, kwargs = mock_write.call_args
-        assert args[0] == vr.full_path
+        args, _ = mock_write.call_args
+        assert args[0] == full_path
         assert isinstance(args[1], np.ndarray)
         assert args[2] == vr.sample_rate

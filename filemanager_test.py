@@ -1,6 +1,5 @@
 import os
 import time
-import tempfile
 from filemanager import FileManager
 
 def test_manage_recordings_dir_creates(tmp_path):

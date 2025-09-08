@@ -1,17 +1,20 @@
 from voicerecorder import VoiceRecorder
 from audiotranscriber import AudioTranscriber
 from filemanager import FileManager
-from dotenv import load_dotenv
+from environmentmanager import EnvironmentManager
+from modelorchestrator import ModelOrchestrator
 
-def load_env_vars():
-    if not load_dotenv():
-        print("No environment variables set within \".env\" file")
-        exit(1)
 
-def capture_command():
-    vr = VoiceRecorder()
-    fm = FileManager()
+def capture_command(configs):
+    fm = FileManager(configs)
+    try:
+        fm.manage_recordings_dir()
+    except Exception as dir_exception:
+        print(f"Directory management failed: {dir_exception}")
+        return
+    print("Recordings directory is ready.")
 
+    vr = VoiceRecorder(configs)
     print("Recording voice command...")
     try:
         vr.record()
@@ -21,14 +24,7 @@ def capture_command():
     print("Voice command successfully recorded.")
     
     try:
-        fm.manage_recordings_dir()
-    except Exception as dir_exception:
-        print(f"Directory management failed: {dir_exception}")
-        return
-    print("Recordings directory is ready.")
-
-    try:
-        vr.save()
+        vr.save(fm.full_path)
     except Exception as save_exception:
         print(f"Saving failed: {save_exception}")
         return
@@ -41,20 +37,21 @@ def capture_command():
         return
     print("Recording cleanup complete.")
 
-    return vr.full_path
+    return fm.full_path
 
-def transcribe_command(filepath):
-    at = AudioTranscriber()
+def transcribe_command(path, configs):
+    at = AudioTranscriber(configs)
     try:
-        at.transcribe(filepath)
+        at.transcribe(path)
     except Exception as transcribe_exception:
         print(f"Transcription failed: {transcribe_exception}")
         return
-    print("Command: " + at.text_command)
-
+    return at.text_command
 
 
 if __name__ == "__main__":
-    load_env_vars()
-    recording_filepath = capture_command()
-    transcribe_command(recording_filepath)
+    env = EnvironmentManager()
+    recording_filepath = capture_command(env.configs)
+    transcription = transcribe_command(path=recording_filepath, configs=env.configs)
+    orchestrator = ModelOrchestrator(env.configs)
+    print(orchestrator.get_response(transcription))
