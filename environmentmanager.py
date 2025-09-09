@@ -1,7 +1,6 @@
-from dotenv import load_dotenv, dotenv_values
-import os
+from dotenv import dotenv_values
 
-class EnvironmentManager:
-    def __init__(self):
-        load_dotenv()
-        self.configs = dotenv_values(".env")
+class Environment:
+    @staticmethod
+    def get(key, default=None):
+        return dotenv_values(".env").get(key) or default

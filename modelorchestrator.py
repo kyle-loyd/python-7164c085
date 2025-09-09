@@ -1,13 +1,13 @@
 import ollama
-from time import sleep
+from environmentmanager import Environment
 
 DEFAULT_OLLAMA_MODEL = "mistral"
 DEFAULT_MODEL_CONTEXT = "You are my digital assistant."
 
 class ModelOrchestrator:    
-    def __init__(self, env_configs={}):
-        self.model_name = env_configs.get("OLLAMA_MODEL", DEFAULT_OLLAMA_MODEL)
-        model_context = env_configs.get("OLLAMA_CONTEXT", DEFAULT_MODEL_CONTEXT)
+    def __init__(self):
+        self.model_name = Environment.get("OLLAMA_MODEL", DEFAULT_OLLAMA_MODEL)
+        model_context = Environment.get("OLLAMA_CONTEXT", DEFAULT_MODEL_CONTEXT)
         self.messages = [{"role": "system", "content": model_context}]
         print(self.messages)
 

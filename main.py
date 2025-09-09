@@ -1,57 +1,19 @@
 from voicerecorder import VoiceRecorder
 from audiotranscriber import AudioTranscriber
-from filemanager import FileManager
-from environmentmanager import EnvironmentManager
+from environmentmanager import Environment
 from modelorchestrator import ModelOrchestrator
+from filemanager import FileManager
+from logger import Logger
 
-
-def capture_command(configs):
-    fm = FileManager(configs)
-    try:
-        fm.manage_recordings_dir()
-    except Exception as dir_exception:
-        print(f"Directory management failed: {dir_exception}")
-        return
-    print("Recordings directory is ready.")
-
-    vr = VoiceRecorder(configs)
-    print("Recording voice command...")
-    try:
-        vr.record()
-    except Exception as record_exception:
-        print(f"Recording failed: {record_exception}")
-        return
-    print("Voice command successfully recorded.")
-    
-    try:
-        vr.save(fm.full_path)
-    except Exception as save_exception:
-        print(f"Saving failed: {save_exception}")
-        return
-    print("Voice command successfully saved.")
-
-    try:
-        fm.manage_recordings()
-    except Exception as manage_exception:
-        print(f"File management failed: {manage_exception}")
-        return
-    print("Recording cleanup complete.")
-
-    return fm.full_path
-
-def transcribe_command(path, configs):
-    at = AudioTranscriber(configs)
-    try:
-        at.transcribe(path)
-    except Exception as transcribe_exception:
-        print(f"Transcription failed: {transcribe_exception}")
-        return
-    return at.text_command
-
+DEFAULT_LOGGING_ROUTE = "console"
 
 if __name__ == "__main__":
-    env = EnvironmentManager()
-    recording_filepath = capture_command(env.configs)
-    transcription = transcribe_command(path=recording_filepath, configs=env.configs)
-    orchestrator = ModelOrchestrator(env.configs)
+    logger = Logger(Environment.get("LOGGING_ROUTE", DEFAULT_LOGGING_ROUTE))
+    VoiceRecorder.save_recording()
+
+    whisper = AudioTranscriber()
+    recording_path = FileManager.get_recording_filepath()
+    transcription = whisper.transcribe(recording_path)
+
+    orchestrator = ModelOrchestrator()
     print(orchestrator.get_response(transcription))
