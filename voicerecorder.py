@@ -1,19 +1,27 @@
-from filemanager import FileManager
-from environmentmanager import Environment, get
+from environmentmanager import ConfigKey
 import sounddevice as device
-import soundfile as file
 
 DEFAULT_DURATION = 5
 DEFAULT_SAMPLE_RATE = 16000
 
-class VoiceRecorder:        
-    @staticmethod
-    def save_recording():
-        duration = int(Environment.get("RECORDING_DURATION", DEFAULT_DURATION))
-        sample_rate = int(Environment.get("SAMPLE_RATE", DEFAULT_SAMPLE_RATE))
-        recordings_dir = Environment.get("RECORDINGS_DIR")
+class Recording:
+    def __init__(self, audio, samplerate):
+        self.audio = audio
+        self.samplerate = samplerate
 
-        audio = device.rec(frames=int(duration * sample_rate), samplerate=sample_rate, channels=1, dtype='float32')
+class VoiceRecorder:        
+    def __init__(self, env, logger):
+        self.duration = int(env.get(ConfigKey.RecordingDuration.value))
+        if self.duration <= 0:
+            self.duration = DEFAULT_DURATION
+            logger.warn(f"Invalid duration in .env, defaulting to {DEFAULT_DURATION} seconds.")
+
+        self.sample_rate = int(env.get(ConfigKey.SampleRate.value))
+        if self.sample_rate < 16000:
+            self.sample_rate = DEFAULT_SAMPLE_RATE
+            logger.warn(f"Invalid sample rate in .env, defaulting to {DEFAULT_SAMPLE_RATE} Hz.")
+    
+    def get_recording(self):
+        audio = device.rec(frames=int(self.duration * self.sample_rate), samplerate=self.sample_rate, channels=1, dtype='float32')
         device.wait()
-        path = FileManager.manage_recordings_dir(recordings_dir)
-        file.write(path, audio, sample_rate)
+        return Recording(audio, self.sample_rate)    

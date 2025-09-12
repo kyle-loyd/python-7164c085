@@ -1,9 +1,14 @@
 from abc import ABC, abstractmethod
-from filemanager import FileManager, manage_logger_file
+from enum import Enum
+
+class LogSeverity(Enum):
+    Info = "INFO"
+    Warning = "WARNING"
+    Error = "ERROR"
 
 class LoggerStrategy(ABC):
     @abstractmethod
-    def log(self, message: str):
+    def log(self, severity, message):
         pass
 
 class Logger:
@@ -13,18 +18,26 @@ class Logger:
     def set_strategy(self, strategy: LoggerStrategy):
         self.strategy = strategy
 
-    def log(self, severity: str, message: str):
+    def log(self, severity, message):
         self.strategy.log(severity, message)
 
+    def info(self, message):
+        self.log(LogSeverity.Info.value, message)   
+
+    def warn(self, message):
+        self.log(LogSeverity.Warning.value, message)
+
+    def error(self, message):
+        self.log(LogSeverity.Error.value, message)
+
 class ConsoleLogger(LoggerStrategy):
-    def log(self, severity: str, message: str):
+    def log(self, severity, message):
         print(f"[{severity}]: {message}")
 
 class FileLogger(LoggerStrategy):
-    def __init__(self, file_path: str):
-        FileManager.manage_logger_file()
-        self.file_path = file_path
+    def __init__(self, file_manager):
+        self.file_manager = file_manager
 
-    def log(self, severity: str, message: str):
-        with open(self.file_path, 'a') as log_file:
-            log_file.write(f"[{severity}]: {message}\n")
+    def log(self, severity, message):
+        log = f"[{severity}]: {message}\n"
+        self.file_manager.write_log(log)
